@@ -9,7 +9,7 @@ use Livewire\Component;
 #[Layout('layouts::guest')]
 class Login extends Component
 {
-    public string $email = 'thimirad865@gmail.com', $password = '12345-passworD';
+    public ?string $email, $password;
 
     protected array $rules;
 
