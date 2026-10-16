@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Faker\Core\File;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -47,14 +47,16 @@ class User extends Authenticatable
 
     /**
      * avatar image or null
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    public function getAvatar()
+    public function getAvatar(): ?string
     {
-        $path = (string) 'photos/' . $this->id . '.jpg';
+        $path = (string) 'photos/'.$this->id.'.jpg';
         if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
         }
+
         return null;
     }
 
@@ -66,13 +68,13 @@ class User extends Authenticatable
         $initials = Str::initials($this->name, true);
 
         return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1) . Str::substr($initials, -1)
+            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
     }
 
     /**
      * get user first name
-     * @return string
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
     public function firstName(): string
@@ -84,18 +86,23 @@ class User extends Authenticatable
 
     /**
      * get user roles
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     *
+     * @return BelongsToMany<Role, $this>
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    public function roles()
+    public function roles(): BelongsToMany
     {
-        $RoleUser = new RoleUser();
+        $RoleUser = new RoleUser;
+
         return $this->belongsToMany(Role::class, $RoleUser->getTable(), 'user_id', 'role_id');
     }
 
     /**
      * get user permissions
-     * @return \Illuminate\Support\Collection<int, mixed>
+     *
+     * @return Collection<int, mixed>
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
     public function permissions()

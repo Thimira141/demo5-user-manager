@@ -10,19 +10,15 @@ class PermissionsSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * permissions array
-     * @var array
-     * @version 1.0.0
-     */
-    protected $permissions = [
-        ["name" => "CREATE_USER", "description" => "Create user"],
-        ["name" => "DELETE_USER", "description" => "Delete user"],
-        ["name" => "UPDATE_USER", "description" => "Update user"],
-        ["name" => "EXPORT_USER_DATA", "description" => "Export user data"],
-        ["name" => "CREATE_ROLE", "description" => "Create role"],
-        ["name" => "DELETE_ROLE", "description" => "Delete role"],
-        ["name" => "UPDATE_ROLE", "description" => "Update role"],
+    /** @var list<array{name: string, description: string}> */
+    protected array $permissions = [
+        ['name' => 'CREATE_USER', 'description' => 'Create user'],
+        ['name' => 'DELETE_USER', 'description' => 'Delete user'],
+        ['name' => 'UPDATE_USER', 'description' => 'Update user'],
+        ['name' => 'EXPORT_USER_DATA', 'description' => 'Export user data'],
+        ['name' => 'CREATE_ROLE', 'description' => 'Create role'],
+        ['name' => 'DELETE_ROLE', 'description' => 'Delete role'],
+        ['name' => 'UPDATE_ROLE', 'description' => 'Update role'],
     ];
 
     /**
@@ -30,6 +26,6 @@ class PermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        collect($this->permissions)->each(fn ($permission) => Permission::updateOrCreate(["name"=> $permission["name"]], $permission));
+        collect($this->permissions)->each(fn ($permission) => Permission::updateOrCreate(['name' => $permission['name']], $permission));
     }
 }

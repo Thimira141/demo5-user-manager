@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Http\Middleware\PermissionCheck;
+use App\Http\Middleware\MultiOrGates;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -22,10 +22,10 @@ class PermissionMiddlewareTest extends TestCase
         $user = $this->userWithPermissions(['UPDATE_ROLE']);
         $this->actingAs($user);
 
-        $response = (new PermissionCheck())->handle(
+        $response = (new MultiOrGates)->handle(
             Request::create('/roles', 'GET'),
-            fn() => response('ok'),
-            'CREATE_ROLE,DELETE_ROLE,UPDATE_ROLE',
+            fn () => response('ok'),
+            'CREATE_ROLE|DELETE_ROLE|UPDATE_ROLE',
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -39,10 +39,10 @@ class PermissionMiddlewareTest extends TestCase
 
         $this->expectException(HttpException::class);
 
-        (new PermissionCheck())->handle(
+        (new MultiOrGates)->handle(
             Request::create('/roles', 'GET'),
-            fn() => response('ok'),
-            'CREATE_ROLE,DELETE_ROLE,UPDATE_ROLE',
+            fn () => response('ok'),
+            'CREATE_ROLE|DELETE_ROLE|UPDATE_ROLE',
         );
     }
 
@@ -52,7 +52,7 @@ class PermissionMiddlewareTest extends TestCase
         $user = User::factory()->create();
         $role = Role::factory()->create();
         $permissions = collect($permissionNames)
-            ->map(fn(string $name) => Permission::factory()->create(['name' => $name]));
+            ->map(fn (string $name) => Permission::factory()->create(['name' => $name]));
 
         $role->permissions()->sync($permissions->pluck('id'));
         $user->roles()->sync([$role->id]);

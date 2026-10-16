@@ -19,8 +19,8 @@ class RoleFactory extends Factory
     {
         // data $name = ["Admin", "Editor", "Teacher", "Student", "Employee", "Role-1", "Role-2"]
         return [
-            "name" => str(fake()->unique()->word())->camel(),
-            "description" => fake()->text(50)
+            'name' => str(fake()->unique()->word())->camel(),
+            'description' => fake()->text(50),
         ];
     }
 }

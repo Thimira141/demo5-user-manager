@@ -2,24 +2,29 @@
 
 namespace App\Models;
 
+use Database\Factories\PermissionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(["name", "description"])]
+#[Fillable(['name', 'description'])]
 class Permission extends Model
 {
-    /** @use HasFactory<\Database\Factories\PermissionFactory> */
+    /** @use HasFactory<PermissionFactory> */
     use HasFactory;
 
     /**
      * roles belong to this permission
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     *
+     * @return BelongsToMany<Role, $this>
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    public function roles()
+    public function roles(): BelongsToMany
     {
-        $PermissionRole = new PermissionRole();
+        $PermissionRole = new PermissionRole;
+
         return $this->belongsToMany(Role::class, $PermissionRole->getTable(), 'permission_id', 'role_id');
     }
 }

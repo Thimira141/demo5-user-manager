@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 #[WithoutTimestamps]
-#[Fillable(["role_id", "user_id"])]
+#[Fillable(['role_id', 'user_id'])]
 class RoleUser extends Pivot
 {
     //

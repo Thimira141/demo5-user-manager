@@ -37,7 +37,7 @@ class ProfilePhotoStorageTest extends TestCase
             ->set('photo', UploadedFile::fake()->image('avatar.jpg'))
             ->call('save', $user);
 
-        $this->assertTrue(Storage::disk('public')->exists('photos/' . $user->id . '.jpg'));
-        $this->assertStringContainsString('/storage/photos/' . $user->id . '.jpg', $user->fresh()->getAvatar());
+        $this->assertTrue(Storage::disk('public')->exists('photos/'.$user->id.'.jpg'));
+        $this->assertStringContainsString('/storage/photos/'.$user->id.'.jpg', $user->fresh()->getAvatar());
     }
 }
