@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: laravel_rbac_app
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    command: bash -c "php artisan migrate --force && php artisan db:seed --class=PermissionsSeeder && php artisan db:seed --class=DatabaseSeeder && php artisan serve --host=0.0.0.0 --port=8000"
