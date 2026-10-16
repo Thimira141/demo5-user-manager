@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Livewire as AppLivewire;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', AppLivewire\Auth\Login::class);
 Route::get('/login', AppLivewire\Auth\Login::class)->name('login');
@@ -16,7 +16,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{user}/view', AppLivewire\Accounts\View::class)->name('accounts.view');
     });
 
-    Route::group(['prefix'=> '/profile'], function () {
+    Route::group(['prefix' => '/profile'], function () {
         Route::get('/', AppLivewire\Auth\My\View::class)->name('profile.view');
         Route::get('/edit', AppLivewire\Auth\My\EditForm::class)->name('profile.edit');
     });
@@ -27,5 +27,3 @@ Route::middleware('auth')->group(function () {
         Route::get('/{role}/edit', AppLivewire\Roles\EditForm::class)->name('roles.update')->middleware('can:UPDATE_ROLE');
     });
 });
-
-// require __DIR__.'/auth.php'; // not using original routes!

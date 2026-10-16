@@ -3,35 +3,54 @@
 namespace App\Livewire\Auth\My;
 
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use TallStackUi\Traits\Interactions;
 
-#[Title("Edit My Profile")]
+#[Title('Edit My Profile')]
 class EditForm extends Component
 {
     use Interactions, WithFileUploads;
 
     public User $user;
-    public ?string $name, $email, $password, $birthday, $notes;
-    public ?int $update_password = null;
-    public $photo = null;
 
-    public function mount()
+    public ?string $name;
+
+    public ?string $email;
+
+    public ?string $password;
+
+    public ?string $birthday;
+
+    public ?string $notes;
+
+    public ?int $update_password = null;
+
+    public ?TemporaryUploadedFile $photo = null;
+
+    public function mount(): void
     {
-        $this->user = Auth::user();
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \LogicException('An authenticated user is required to edit the profile.');
+        }
+
+        $this->user = $user;
         $this->name = $this->user->name;
         $this->email = $this->user->email;
         $this->birthday = $this->user->birthday;
         $this->notes = $this->user->notes;
     }
 
-    public function save()
+    public function save(): void
     {
         // validate
         $validated = $this->validate($this->rules());
@@ -40,16 +59,16 @@ class EditForm extends Component
         if (isset($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         }
-        if ($this->user->update(collect($validated)->except(['roles', 'photo'])->toArray())) {
+        if ($this->user->update(Arr::except($validated, ['roles', 'photo']))) {
             // update photo if have
-            if (!empty($validated['photo'])) {
-                if (!$this->storeAvatar($validated['photo'])) {
-                    $this->dialog()->error("Failed!", "User photo upload failed!")->send();
+            if (! empty($validated['photo'])) {
+                if (! $this->storeAvatar($validated['photo'])) {
+                    $this->dialog()->error('Failed!', 'User photo upload failed!')->send();
                 }
             }
-            $this->dialog()->success("Success!", "User account updated!")->send();
+            $this->dialog()->success('Success!', 'User account updated!')->send();
         } else {
-            $this->dialog()->error("Failed!", "User account update failed!")->send();
+            $this->dialog()->error('Failed!', 'User account update failed!')->send();
         }
     }
 
@@ -58,48 +77,52 @@ class EditForm extends Component
         return Storage::disk('public')->putFileAs(
             'photos',
             $photo,
-            $this->user->id . '.jpg',
+            $this->user->id.'.jpg',
         ) !== false;
     }
+
     /**
      * rules set
-     * @return array{birthday: string[], email: array<string|\Illuminate\Validation\Rules\Unique>, name: array<string|\Illuminate\Validation\Rules\Unique>, notes: string[], password: string[]}
+     *
+     * @return array<string, array<int, mixed>>
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    private function rules()
+    private function rules(): array
     {
-        $password_rule = $this->update_password ? ["password" => ["required", "string", "max:50", "min:8"]] : [];
+        $password_rule = $this->update_password ? ['password' => ['required', 'string', 'max:50', 'min:8']] : [];
+
         return [
-            "name" => [
-                "required",
-                "string",
-                "max:200",
-                Rule::unique("users", "name")->ignore($this->user),
+            'name' => [
+                'required',
+                'string',
+                'max:200',
+                Rule::unique('users', 'name')->ignore($this->user),
             ],
-            "email" => [
-                "required",
-                "email",
-                Rule::unique("users", "email")->ignore($this->user),
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($this->user),
             ],
-            "birthday" => [
-                "required",
-                Rule::date()->format("Y-m-d")
+            'birthday' => [
+                'required',
+                Rule::date()->format('Y-m-d'),
             ],
-            "notes" => [
-                "nullable",
-                "string",
-                "max:200",
+            'notes' => [
+                'nullable',
+                'string',
+                'max:200',
             ],
-            "photo" => [
-                "nullable",
-                "image",
-                "max:2048"
+            'photo' => [
+                'nullable',
+                'image',
+                'max:2048',
             ],
-            ...$password_rule
+            ...$password_rule,
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.auth.my.edit-form');
     }

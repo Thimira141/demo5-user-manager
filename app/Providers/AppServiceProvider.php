@@ -33,13 +33,13 @@ class AppServiceProvider extends ServiceProvider
         /**
          * gates
          */
-        Gate::define("CREATE_USER", fn (User $user) => $user->permissions()->contains('name', 'CREATE_USER'));
-        Gate::define("DELETE_USER", fn (User $user) => $user->permissions()->contains('name', 'DELETE_USER'));
-        Gate::define("UPDATE_USER", fn (User $user) => $user->permissions()->contains('name', 'UPDATE_USER'));
-        Gate::define("EXPORT_USER_DATA", fn (User $user) => $user->permissions()->contains('name', 'EXPORT_USER_DATA'));
-        Gate::define("CREATE_ROLE", fn (User $user) => $user->permissions()->contains('name', 'CREATE_ROLE'));
-        Gate::define("DELETE_ROLE", fn (User $user) => $user->permissions()->contains('name', 'DELETE_ROLE'));
-        Gate::define("UPDATE_ROLE", fn (User $user) => $user->permissions()->contains('name', 'UPDATE_ROLE'));
+        Gate::define('CREATE_USER', fn (User $user) => $user->permissions()->contains('name', 'CREATE_USER'));
+        Gate::define('DELETE_USER', fn (User $user) => $user->permissions()->contains('name', 'DELETE_USER'));
+        Gate::define('UPDATE_USER', fn (User $user) => $user->permissions()->contains('name', 'UPDATE_USER'));
+        Gate::define('EXPORT_USER_DATA', fn (User $user) => $user->permissions()->contains('name', 'EXPORT_USER_DATA'));
+        Gate::define('CREATE_ROLE', fn (User $user) => $user->permissions()->contains('name', 'CREATE_ROLE'));
+        Gate::define('DELETE_ROLE', fn (User $user) => $user->permissions()->contains('name', 'DELETE_ROLE'));
+        Gate::define('UPDATE_ROLE', fn (User $user) => $user->permissions()->contains('name', 'UPDATE_ROLE'));
     }
 
     /**

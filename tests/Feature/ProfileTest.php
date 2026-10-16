@@ -10,6 +10,24 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_profile_page_can_be_rendered(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk();
+    }
+
+    public function test_profile_edit_page_can_be_rendered(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/profile/edit')
+            ->assertOk();
+    }
+
     // public function test_profile_page_is_displayed(): void
     // {
     //     $user = User::factory()->create();

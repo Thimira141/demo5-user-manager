@@ -19,8 +19,8 @@ class PermissionFactory extends Factory
     {
         // data: $name = ["CREATE_USER", "DELETE_USER", "UPDATE_USER", "EXPORT_USER_DATA", "CREATE_ROLE", "DELETE_ROLE", "UPDATE_ROLE"]
         return [
-            "name" => str(fake()->unique()->word())->upper(),
-            "description" => fake()->text(50)
+            'name' => str(fake()->unique()->word())->upper(),
+            'description' => fake()->text(50),
         ];
     }
 }

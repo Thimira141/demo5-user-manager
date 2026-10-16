@@ -4,6 +4,8 @@ namespace App\Livewire\Accounts;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -14,13 +16,31 @@ class Form extends Component
     use Interactions;
 
     // variables
-    public ?string $name, $email, $password, $birthday, $notes;
-    public ?int $userId = null, $update_password = 1;
+    public ?string $name;
+
+    public ?string $email;
+
+    public ?string $password;
+
+    public ?string $birthday;
+
+    public ?string $notes;
+
+    public ?int $userId = null;
+
+    public ?int $update_password = 1;
+
     public ?User $user;
-    public ?array $roles, $rolesData;
+
+    /** @var array<array-key, mixed>|null */
+    public ?array $roles;
+
+    /** @var array<array-key, mixed>|null */
+    public ?array $rolesData;
 
     /**
      * construct
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
     public function __construct()
@@ -31,32 +51,27 @@ class Form extends Component
 
     /**
      * mount data from model
-     * @param mixed $user
-     * @return void
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    public function mount(?User $user)
+    public function mount(?User $user = null): void
     {
-        // if (!$user) {
-        // todo: handle user not found,
-        //     $this->dialog()->error("User not found!")->send();
-        // }
-
         $this->user = $user;
-        $this->userId = $user->id;
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->birthday = $user->birthday;
-        $this->notes = $user->notes;
-        $this->roles = $user->roles()->pluck('id')->toArray();
+        $this->userId = $user?->id;
+        $this->name = $user?->name;
+        $this->email = $user?->email;
+        $this->birthday = $user?->birthday;
+        $this->notes = $user?->notes;
+        $this->roles = $user?->roles()->pluck('id')->all() ?? [];
     }
 
     /**
      * create/update user account
-     * @return void
+     *
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    public function save()
+    public function save(): void
     {
         // validate
         $validated = $this->validate($this->rules());
@@ -66,116 +81,136 @@ class Form extends Component
             $validated['password'] = bcrypt($validated['password']);
         }
 
-        if (!$this->userId) {
+        if (! $this->userId) {
             // create
             $this->authorize('CREATE_USER');
             $this->create_user($validated);
         } else {
             // update
             $this->authorize('UPDATE_USER');
-            $this->update_user($validated);
+            if (! $this->user) {
+                throw new \LogicException('The account being updated could not be loaded.');
+            }
+
+            $this->update_user($this->user, $validated);
         }
     }
 
     /**
      * create new user
-     * @param array $validated
-     * @return void
+     *
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    protected function create_user(array $validated)
+    /** @param array<string, mixed> $validated */
+    protected function create_user(array $validated): void
     {
-        if ($user = User::create(collect($validated)->except('roles')->toArray())) {
-            $this->dialog()->success("Success!", "User account created!")->send();
-            // sync user roles
-            $this->syncRoles($user, $validated['roles']);
-            $this->reset();
-            $this->mount($user);
-        } else {
-            $this->dialog()->error("Failed!", "User account create failed!")->send();
-        }
+        $user = User::create(Arr::except($validated, ['roles']));
+        $this->syncRoles($user, $this->validatedRoles($validated));
+        $this->dialog()->success('Success!', 'User account created!')->send();
+        $this->reset();
+        $this->mount($user);
     }
 
     /**
      * update user
-     * @param array $validated
-     * @return void
+     *
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    protected function update_user(array $validated)
+    /** @param array<string, mixed> $validated */
+    protected function update_user(User $user, array $validated): void
     {
-        if ($this->user->update(collect($validated)->except('roles')->toArray())) {
-            $this->dialog()->success("Success!", "User account updated!")->send();
+        if ($user->update(Arr::except($validated, ['roles']))) {
+            $this->dialog()->success('Success!', 'User account updated!')->send();
             // sync user roles
-            $this->syncRoles($this->user, $validated['roles']);
+            $this->syncRoles($user, $this->validatedRoles($validated));
         } else {
-            $this->dialog()->error("Failed!", "User account update failed!")->send();
+            $this->dialog()->error('Failed!', 'User account update failed!')->send();
         }
     }
 
     /**
      * sync roles with user
-     * @param User $user
-     * @param array $roles
-     * @return void
+     *
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    private function syncRoles(User $user, array $roles)
+    /**
+     * @param  array<array-key, mixed>  $roles
+     */
+    private function syncRoles(User $user, array $roles): void
     {
-        if (!$user->roles()->sync($roles)) {
-            $this->dialog()->error('Sync Failed!', 'User roles sync failed!')->send();
+        $user->roles()->sync($roles);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @return array<array-key, mixed>
+     */
+    private function validatedRoles(array $validated): array
+    {
+        $roles = $validated['roles'] ?? null;
+        if (! is_array($roles)) {
+            throw new \LogicException('Validated account data did not include role IDs.');
         }
+
+        return $roles;
     }
 
     /**
      * rules set
-     * @return array{birthday: string[], email: array<string|\Illuminate\Validation\Rules\Unique>, name: array<string|\Illuminate\Validation\Rules\Unique>, notes: string[], password: string[]}
+     *
+     * @return array<string, array<int, mixed>>
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    private function rules()
+    private function rules(): array
     {
-        $password_rule = $this->update_password ? ["password" => ["required", "string", "max:50", "min:8"]] : [];
+        $password_rule = $this->update_password ? ['password' => ['required', 'string', 'max:50', 'min:8']] : [];
+
         return [
-            "name" => [
-                "required",
-                "string",
-                "max:200",
-                Rule::unique("users", "name")->ignore($this->user),
+            'name' => [
+                'required',
+                'string',
+                'max:200',
+                Rule::unique('users', 'name')->ignore($this->user),
             ],
-            "email" => [
-                "required",
-                "email",
-                Rule::unique("users", "email")->ignore($this->user),
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($this->user),
             ],
-            "birthday" => [
-                "required",
-                Rule::date()->format("Y-m-d")
+            'birthday' => [
+                'required',
+                Rule::date()->format('Y-m-d'),
             ],
-            "notes" => [
-                "nullable",
-                "string",
-                "max:200",
+            'notes' => [
+                'nullable',
+                'string',
+                'max:200',
             ],
             'roles' => [
-                "required",
-                "array",
+                'required',
+                'array',
                 Rule::exists('roles', 'id'),
-                "min:1"
+                'min:1',
             ],
-            ...$password_rule
+            ...$password_rule,
         ];
     }
 
     /**
      * render
-     * @return \Illuminate\Contracts\View\View
+     *
+     * @return View
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
     public function render()
     {
-        // padding needs be under 6 digits more than 6, let the original number be present
         return view('livewire.accounts.form')
             // set layout title
-            ->title($this->userId ? "Update User [#" . Str::padLeft($this->userId, 6) . "]" : "New Account");
+            ->title($this->userId ? 'Update User [#'.Str::padLeft((string) $this->userId, 6).']' : 'New Account');
     }
 }

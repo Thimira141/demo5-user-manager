@@ -17,9 +17,9 @@ class ModelRelationships extends TestCase
     public function role_permission_relationship()
     {
         // create role
-        $role = Role::factory()->create(["name" => "TestRole"]);
+        $role = Role::factory()->create(['name' => 'TestRole']);
         // create permission
-        $permission = Permission::factory()->create(["name" => "TEST_PERMISSION_1"]);
+        $permission = Permission::factory()->create(['name' => 'TEST_PERMISSION_1']);
         // sync permission with role
         $role->permissions()->sync([$permission->id]);
         // check data in relationship
@@ -30,9 +30,9 @@ class ModelRelationships extends TestCase
     public function role_user_relationship()
     {
         // create user
-        $user = User::factory()->create(["name" => "Test User"]);
+        $user = User::factory()->create(['name' => 'Test User']);
         // create role
-        $role = Role::factory()->create(["name" => "TestRole"]);
+        $role = Role::factory()->create(['name' => 'TestRole']);
         // sync role with user
         $user->roles()->sync([$role->id]);
         // check data in relationship
@@ -43,9 +43,9 @@ class ModelRelationships extends TestCase
     public function role_user_role_permission()
     {
         // create data
-        $user = User::factory()->create(["name" => "Test User"]);
-        $permission = Permission::factory()->create(["name" => "TEST_PERMISSION_1"]);
-        $role = Role::factory()->create(["name" => "TestRole"]);
+        $user = User::factory()->create(['name' => 'Test User']);
+        $permission = Permission::factory()->create(['name' => 'TEST_PERMISSION_1']);
+        $role = Role::factory()->create(['name' => 'TestRole']);
 
         // attach data to models
         $role->permissions()->sync([$permission->id]);

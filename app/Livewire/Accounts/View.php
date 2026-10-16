@@ -3,21 +3,27 @@
 namespace App\Livewire\Accounts;
 
 use App\Models\User;
+use Illuminate\Contracts\View\View as ViewContract;
 use Livewire\Component;
 
 class View extends Component
 {
     public User $user;
-    public ?array $roles, $permissions;
 
-    public function mount(User $user)
+    /** @var array<array-key, mixed>|null */
+    public ?array $roles;
+
+    /** @var array<array-key, mixed>|null */
+    public ?array $permissions;
+
+    public function mount(User $user): void
     {
-        $this->user = User::find($user->id);
+        $this->user = $user;
         $this->roles = $user->roles()->get()->toArray();
         $this->permissions = $user->permissions()->toArray();
     }
 
-    public function render()
+    public function render(): ViewContract
     {
         return view('livewire.accounts.view');
     }

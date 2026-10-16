@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
         $adminRole = Role::firstOrCreate(['name' => 'Admin']);
-        $adminRole->permissions()->sync(Permission::all()->pluck('id')->toArray());
+        $adminRole->permissions()->sync(Permission::query()->pluck('id')->toArray());
         $admin->roles()->sync([$adminRole->id]);
 
         // user editor

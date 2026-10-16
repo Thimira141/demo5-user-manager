@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use TallStackUi\Traits\Interactions;
@@ -12,7 +13,7 @@ class Logout extends Component
 
     /**
      * init logout ad confirm dialog
-     * @return void
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
     public function logout(): void
@@ -26,18 +27,19 @@ class Logout extends Component
 
     /**
      * logout logic
+     *
      * @author Thimira Dilshan <thimirad865@gmail.com>
      */
-    public function confirmLogout()
+    public function confirmLogout(): void
     {
         Auth::logout();
         session()->invalidate();
         session()->regenerateToken();
 
-        return $this->redirect(route('login'), navigate: true);
+        $this->redirect(route('login'), navigate: true);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.auth.logout');
     }
